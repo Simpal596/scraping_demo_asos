@@ -12,7 +12,8 @@ URL = "https://www.asos.com/fr/femme/"
 def get_data(driver, product_url):
     try:
         designation = browser.find_element(By.TAG_NAME, "h1").text.split("-")[1].split("-")[0]
-    except:
+    except Exception as e:
+
         designation = None
 
     try:
@@ -30,7 +31,7 @@ def get_data(driver, product_url):
         brand = browser.find_element(By.CSS_SELECTOR,
                                      "#product-details-container > div:nth-child(1) > div > p:nth-child(2) > a:nth-child(2) > strong").text
     except:
-        brand = None
+        brand = browser.find_element(By.TAG_NAME, "h1").text.split("-")[0]
 
     try:
         collection = browser.find_element(By.CSS_SELECTOR,
@@ -54,7 +55,7 @@ def get_data(driver, product_url):
                                            "#product-details-container > div:nth-child(1) > div > ul").text
     except:
         description = None
-    print(product_code)
+    print(f'product_code = {product_code}')
     return product_url,brand,collection,category,color,designation,description,product_code,price
 
 def get_hrefs(driver):
@@ -79,49 +80,24 @@ if __name__ == "__main__":
     ])
     # browser.get("https://www.asos.com/fr/pullbear/pullbear-blazer-oversize-bleu-de-cobalt/prd/204064132?clr=bleu&colourWayId=204064133&SearchQuery=blazers")
     browser.get(URL)
-    WebDriverWait(browser,5).until(EC.presence_of_element_located((By.ID, "chrome-search"))).send_keys("Blazers", Keys.ENTER)
+    WebDriverWait(browser,7).until(EC.presence_of_element_located((By.ID, "chrome-search"))).send_keys("Blazers", Keys.ENTER)
     WebDriverWait(browser,5).until(EC.presence_of_element_located((By.CLASS_NAME, "ApgHkaK")))
     href_list = get_hrefs(browser)
     for href in href_list:
-        browser.get(href)
-        sleep(2)
-        # try:
-        #     print("first try me ghusa")
-        #     try:
-        #         print("second try me ghusa mtlb try ka try")
-        #         try:
-        #             browser.find_element(By.ID, "att_lightbox_close").click()
-        #             browser.find_element(By.CLASS_NAME, "_1TlOB9h._2tvh469._19qEA_b").click()
-        #             WebDriverWait(browser,5).until(EC.presence_of_element_located((By.CLASS_NAME, "glYZgHa"))).click()
-        #         except:
-        #             browser.find_element(By.CLASS_NAME, "_1TlOB9h._2tvh469._19qEA_b").click()
-        #             WebDriverWait(browser,5).until(EC.presence_of_element_located((By.CLASS_NAME, "glYZgHa"))).click()
-        #             browser.find_element(By.ID, "att_lightbox_close").click()
-        #     except Exception as e:
-        #         print(e)
-        #         print("first try ke andar k try ka exceept")
-        #         browser.find_element(By.CLASS_NAME, "_1TlOB9h._2tvh469._12h15d-").click()
-        #         WebDriverWait(browser,5).until(EC.presence_of_element_located((By.CLASS_NAME, "glYZgHa"))).click()
-        # except Exception as e:
-        #     print(e)
-        #     print("first try ka except")
-        #     pass
         try:
-            WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.LINK_TEXT, "PLUS DE DÉTAILS"))).click()
-            WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "about-me")))
-        except:
+            browser.get(href)
+            print(href)
+            print("===============================")
+            sleep(2)
             try:
-                browser.find_element(By.ID, "att_lightbox_close").click()
-                browser.find_element(By.CLASS_NAME, "_1TlOB9h._2tvh469._19qEA_b").click()
-                WebDriverWait(browser,5).until(EC.presence_of_element_located((By.CLASS_NAME, "glYZgHa"))).click()
-                WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.LINK_TEXT, "PLUS DE DÉTAILS"))).click()
-                WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "about-me")))
+                browser.find_element(By.ID, "onetrust-accept-btn-handler").click()
             except:
-                browser.find_element(By.CLASS_NAME, "_1TlOB9h._2tvh469._19qEA_b").click()
-                WebDriverWait(browser,5).until(EC.presence_of_element_located((By.CLASS_NAME, "glYZgHa"))).click()
                 WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.LINK_TEXT, "PLUS DE DÉTAILS"))).click()
                 WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "about-me")))
-
+        except Exception as e:
+            print(e)
+            print("something unexpected happened")
+            pass
         data.loc[len(data)] = get_data(browser,href)
-        # browser.close()
+    browser.close()
     data.to_excel("full_data.xlsx")
